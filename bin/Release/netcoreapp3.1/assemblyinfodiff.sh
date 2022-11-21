@@ -1,0 +1,1 @@
+t1=`mktemp` && `assemblyinfo.exe $1 > $t1` && t2=`mktemp` && `assemblyinfo.exe $2 > $t2` && WinMergeU.exe $t1 $t2 && rm -f $t1 $t2
