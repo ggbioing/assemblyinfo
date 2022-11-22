@@ -10,43 +10,57 @@ namespace assemblyinfo
     {
         static void Main(string[] args)
         {
-            //string file_or_dir = Path.GetFullPath(args[0]);
             string file_or_dir = args[0];
 
             FileAttributes fattr = File.GetAttributes(file_or_dir);
 
-            if (fattr.HasFlag(FileAttributes.Directory))
+
+            if (fattr.HasFlag(FileAttributes.Directory))  // if arg[0] is a Directory, iterate over all *exe and *dll
             {
                 Matcher matcher = new Matcher();
-                //matcher.AddIncludePatterns(new[] { "**/*.exe" });
-                //matcher.AddIncludePatterns(new[] { "**/*.exe", "**/*.dll" });
+                // matcher.AddIncludePatterns(new[] { "**/*.exe", "**/*.dll" });  // recursive on subfolder
                 matcher.AddIncludePatterns(new[] { "*.exe", "*.dll" });
 
                 foreach (string file in matcher.GetResultsInFullPath(file_or_dir))
                 {
-                    PrintAssemblyInfo(file);
+                    PrintAssemblyInfo(file, all:false);
+                    Console.WriteLine();
                 }
             }
-            else
+            else  // if arg[0] is a File
             {
-                PrintAssemblyInfo(file_or_dir);
+                PrintAssemblyInfo(file_or_dir, all:true);
             }
         }
-        static void PrintAssemblyInfo(string assemblyFile, string sep = "\t")
+        /// <summary>
+        /// Print to stdout informations (name, version, etc.) about *.exe or *.dll assemblies
+        /// </summary>
+        /// <param name="assemblyFile">*.exe or *.dll file</param>
+        /// <param name="pad">alines information lines to have the same 'pad' width</param>
+        /// <param name="sep">separator between information name and information</param>
+        /// <param name="sep2">separator between informations</param>
+        /// <param name="all">print all informations of just a part of it</param>
+        static void PrintAssemblyInfo(string assemblyFile, int pad=18, string sep = "", string sep2="\n", bool all=true)
         {
             if (File.Exists(assemblyFile))
             {
                 List<string> msg = new List<string>();
                 FileVersionInfo fv = FileVersionInfo.GetVersionInfo(assemblyFile);
-                //msg.Add(Path.GetFileName(fv.FileName));
-                //// msg.Add("File" + sep + fv.FileName);
-                //// msg.Add("InternalName" + sep + fv.InternalName);
-                //// msg.Add("OriginalFileName" + sep + fv.OriginalFilename);
-                //msg.Add("ProductName" + sep + fv.ProductName);
-                //msg.Add("ProductVersion" + sep + fv.ProductVersion);
-                //msg.Add("FileVersion" + sep + fv.FileVersion);
-                msg.Add(fv.ToString());  // complete infos
-                string s = String.Join(sep, msg.ToArray());
+                if (all)
+                {
+                    msg.Add(fv.ToString());  // complete infos
+                }
+                else
+                {
+                    msg.Add("File:".PadRight(pad, ' ') + sep + fv.FileName);
+                    msg.Add("InternalName:".PadRight(pad, ' ') + sep + fv.InternalName);
+                    msg.Add("OriginalFileName:".PadRight(pad, ' ') + sep + fv.OriginalFilename);
+                    msg.Add("FileVersion:".PadRight(pad, ' ') + sep + fv.FileVersion);
+                    msg.Add("FileDescription:".PadRight(pad, ' ') + sep + fv.FileDescription);
+                    msg.Add("ProductName".PadRight(pad, ' ') + sep + fv.ProductName);
+                    msg.Add("ProductVersion".PadRight(pad, ' ') + sep + fv.ProductVersion);
+                }
+                string s = String.Join(sep2, msg.ToArray());
                 Console.WriteLine(s.Trim());
             }
         }
