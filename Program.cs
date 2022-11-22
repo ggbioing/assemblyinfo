@@ -10,27 +10,28 @@ namespace assemblyinfo
     {
         static void Main(string[] args)
         {
-            string file_or_dir = args[0];
-
-            FileAttributes fattr = File.GetAttributes(file_or_dir);
-
-
-            if (fattr.HasFlag(FileAttributes.Directory))  // if arg[0] is a Directory, iterate over all *exe and *dll
+            foreach (string file_or_dir in args)
             {
-                Matcher matcher = new Matcher();
-                // matcher.AddIncludePatterns(new[] { "**/*.exe", "**/*.dll" });  // recursive on subfolder
-                matcher.AddIncludePatterns(new[] { "*.exe", "*.dll" });
+                FileAttributes fattr = File.GetAttributes(file_or_dir);
 
-                foreach (string file in matcher.GetResultsInFullPath(file_or_dir))
+                if (fattr.HasFlag(FileAttributes.Directory))  // if file_or_dir is a Directory, iterate over all *exe and *dll
                 {
-                    PrintAssemblyInfo(file, all:false);
+                    Matcher matcher = new Matcher();
+                    // matcher.AddIncludePatterns(new[] { "**/*.exe", "**/*.dll" });  // recursive on subfolder
+                    matcher.AddIncludePatterns(new[] { "*.exe", "*.dll" });
+
+                    foreach (string file in matcher.GetResultsInFullPath(file_or_dir))
+                    {
+                        PrintAssemblyInfo(file, all:false);
+                        Console.WriteLine();
+                    }
+                }
+                else  // if arg[0] is a File
+                {
+                    PrintAssemblyInfo(file_or_dir, all:false);
                     Console.WriteLine();
                 }
-            }
-            else  // if arg[0] is a File
-            {
-                PrintAssemblyInfo(file_or_dir, all:true);
-            }
+            }            
         }
         /// <summary>
         /// Print to stdout informations (name, version, etc.) about *.exe or *.dll assemblies
