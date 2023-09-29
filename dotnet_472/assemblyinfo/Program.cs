@@ -70,7 +70,7 @@ namespace assemblyinfo
                     msg.Add("OriginalFileName:".PadRight(pad, ' ') + sep + fv.OriginalFilename);
                     string FileVersion = fv.FileVersion;
                     string FileVersionCkeck = $"{fv.FileMajorPart}.{fv.FileMinorPart}.{fv.FileBuildPart}";
-                    if (!String.IsNullOrEmpty(FileVersion) && FileVersion.Contains(FileVersionCkeck))
+                    if (String.IsNullOrEmpty(FileVersion) || FileVersion.Contains(FileVersionCkeck))
                     {
                         msg.Add("FileVersion:".PadRight(pad, ' ') + sep + FileVersion);
                     }
@@ -82,7 +82,7 @@ namespace assemblyinfo
                     msg.Add("ProductName".PadRight(pad, ' ') + sep + fv.ProductName);
                     string ProductVersion = fv.ProductVersion;
                     string ProductVersionCheck = $"{fv.ProductMajorPart}.{fv.ProductMinorPart}.{fv.ProductBuildPart}";
-                    if (!String.IsNullOrEmpty(ProductVersion) && ProductVersion.Contains(ProductVersionCheck))
+                    if (String.IsNullOrEmpty(ProductVersion) || ProductVersion.Contains(ProductVersionCheck))
                     {
                         msg.Add("ProductVersion".PadRight(pad, ' ') + sep + ProductVersion);
                     }
