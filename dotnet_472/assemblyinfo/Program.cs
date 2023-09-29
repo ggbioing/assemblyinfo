@@ -12,15 +12,15 @@ namespace assemblyinfo
         {
             foreach (string file_or_dir in args)
             {
-                FileAttributes fattr = File.GetAttributes(file_or_dir);
-
+                string full_path = Path.GetFullPath(file_or_dir);
+                FileAttributes fattr = File.GetAttributes(full_path);
                 if (fattr.HasFlag(FileAttributes.Directory))  // if file_or_dir is a Directory, iterate over all *exe and *dll
                 {
                     Matcher matcher = new Matcher();
                     // matcher.AddIncludePatterns(new[] { "**/*.exe", "**/*.dll" });  // recursive on subfolder
                     matcher.AddIncludePatterns(new[] { "*.exe", "*.dll" });
 
-                    foreach (string file in matcher.GetResultsInFullPath(file_or_dir))
+                    foreach (string file in matcher.GetResultsInFullPath(full_path))
                     {
                         PrintAssemblyInfo(file, all: false);
                         Console.WriteLine();
@@ -46,7 +46,8 @@ namespace assemblyinfo
             if (File.Exists(assemblyFile))
             {
                 List<string> msg = new List<string>();
-                FileVersionInfo fv = FileVersionInfo.GetVersionInfo(assemblyFile);
+                string full_path = Path.GetFullPath(assemblyFile);
+                FileVersionInfo fv = FileVersionInfo.GetVersionInfo(full_path);
                 if (all)
                 {
                     msg.Add(fv.ToString());  // complete infos
@@ -56,10 +57,28 @@ namespace assemblyinfo
                     msg.Add("File:".PadRight(pad, ' ') + sep + fv.FileName);
                     msg.Add("InternalName:".PadRight(pad, ' ') + sep + fv.InternalName);
                     msg.Add("OriginalFileName:".PadRight(pad, ' ') + sep + fv.OriginalFilename);
-                    msg.Add("FileVersion:".PadRight(pad, ' ') + sep + fv.FileVersion);
+                    string FileVersion = fv.FileVersion;
+                    string FileVersionCkeck = $"{fv.FileMajorPart}.{fv.FileMinorPart}.{fv.FileBuildPart}";
+                    if (FileVersion.Contains(FileVersionCkeck))
+                    {
+                        msg.Add("FileVersion:".PadRight(pad, ' ') + sep + FileVersion);
+                    }
+                    else
+                    {
+                        msg.Add("FileVersion:".PadRight(pad, ' ') + sep + $"{FileVersion} (check {FileVersionCkeck})");
+                    }
                     msg.Add("FileDescription:".PadRight(pad, ' ') + sep + fv.FileDescription);
                     msg.Add("ProductName".PadRight(pad, ' ') + sep + fv.ProductName);
-                    msg.Add("ProductVersion".PadRight(pad, ' ') + sep + fv.ProductVersion);
+                    string ProductVersion = fv.ProductVersion;
+                    string ProductVersionCheck = $"{fv.ProductMajorPart}.{fv.ProductMinorPart}.{fv.ProductBuildPart}";
+                    if (ProductVersion.Contains(ProductVersionCheck))
+                    {
+                        msg.Add("ProductVersion".PadRight(pad, ' ') + sep + ProductVersion);
+                    }
+                    else
+                    {
+                        msg.Add("ProductVersion:".PadRight(pad, ' ') + sep + $"{ProductVersion} (check {ProductVersionCheck})");
+                    }
                 }
                 string s = String.Join(sep2, msg.ToArray());
                 Console.WriteLine(s.Trim());
